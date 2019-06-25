@@ -24,7 +24,7 @@ uregs:
      *  用户程序入口临时存储：0x807F0078
      */
 SHELL:
-    jal READSERIAL                  // 读操作符
+    jal READBYTE                  // 读操作符
     nop
 
     ori t0, zero, SH_OP_R
@@ -46,7 +46,7 @@ SHELL:
     nop
 
 .OP_T:                              // 操作 - 打印TLB项
-    jal READSERIALWORD              // 取num(index)
+    jal READWORD              // 取num(index)
     nop
     addiu sp, sp, -0x18
     sw s0, 0x0(sp)
@@ -118,10 +118,10 @@ SHELL:
     sw s0, 0(sp)
     sw s1, 4(sp)
 
-    jal READSERIALWORD
+    jal READWORD
     nop
     or s0, v0, zero                 // 获得addr
-    jal READSERIALWORD
+    jal READWORD
     nop
     or s1, v0, zero                 // 获得num
 
@@ -145,15 +145,15 @@ SHELL:
     sw s0, 0(sp)
     sw s1, 4(sp)
 
-    jal READSERIALWORD
+    jal READWORD
     nop
     or s0, v0, zero                 // 获得addr
-    jal READSERIALWORD
+    jal READWORD
     nop
     or s1, v0, zero                 // 获得num
     srl s1, s1, 2                   // num除4，获得字数
 .LC2:                               // 每次写入一字
-    jal READSERIALWORD              // 从串口读入一字
+    jal READWORD              // 从串口读入一字
     nop
     sw v0, 0(s0)                    // 写内存一字
     addiu s1, s1, -1                // 滚动计数器
@@ -168,7 +168,7 @@ SHELL:
     nop
 
 .OP_G:
-    jal READSERIALWORD              // 获取addr
+    jal READWORD              // 获取addr
     nop
 
     ori a0, zero, TIMERSET          // 写TIMERSET(0x06)信号

@@ -278,6 +278,9 @@ bss_init_done:
     nop
 #endif
 
+    jal USB_SL811_INIT              
+    nop
+
     j WELCOME                       // 进入主线程
     nop
 

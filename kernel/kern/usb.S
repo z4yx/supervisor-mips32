@@ -1,28 +1,17 @@
 #include<usb.h>
 #include<usb_hid.h>
 #include<sl811.h>
+#include<regdef.h>
 
 
     .set noreorder
     .set noat
     .rdata
 KEY_TABLE:
-    .byte 0,0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-  '1','2','3','4','5','6','7','8','9','0',
-  '\r',0,'\b','\t',' ','-','=','[',']','\\',0,';','\'','`',',','.','/',0,
-  'F','F','F','F','F','F','F','F','F','F','F','F', 
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,'/','*','-','+','\r','1','2','3','4','5','6','7','8','9','0','.',0,0,0,'=',
-  'F','F','F','F','F','F','F','F','F','F','F','F', 
-  0,0,0,0,0,0,0,0,0,0,0,0
+    .byte 0,0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','\r',0,'\b','\t',' ','-','=','[',']','\\',0,';','\'','`',',','.','/',0,'F','F','F','F','F','F','F','F','F','F','F','F', 0,0,0,0,0,0,0,0,0,0,0,0,0,0,'/','*','-','+','\r','1','2','3','4','5','6','7','8','9','0','.',0,0,0,'=', 'F','F','F','F','F','F','F','F','F','F','F','F', 0,0,0,0,0,0,0,0,0,0,0,0
 
 KEY_SHIFT_TABLE:
-    .byte 0,0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-  '!','@','#','$','%','^','&','*','(',')',
-  '\r',0,'\b','\t',' ','_','+','{','}','|',0,':','"','~','<','>','?',0,
-  'F','F','F','F','F','F','F','F','F','F','F','F', 
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,'/','*','-','+','\r','1','2','3','4','5','6','7','8','9','0','.',0,0,0,'=',
-  'F','F','F','F','F','F','F','F','F','F','F','F', 
-  0,0,0,0,0,0,0,0,0,0,0,0
+    .byte 0,0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','!','@','#','$','%','^','&','*','(',')','\r',0,'\b','\t',' ','_','+','{','}','|',0,':','"','~','<','>','?',0,'F','F','F','F','F','F','F','F','F','F','F','F',0,0,0,0,0,0,0,0,0,0,0,0,0,0,'/','*','-','+','\r','1','2','3','4','5','6','7','8','9','0','.',0,0,0,'=','F','F','F','F','F','F','F','F','F','F','F','F',0,0,0,0,0,0,0,0,0,0,0,0
 
     .bss
     .global KEYBOARD_BUF
@@ -90,7 +79,7 @@ SL811_WRITE_BUF:
     nop
     addi s0, s0, -1
     addi s1, s1, -1
-    bgez s0 .L0
+    bgez s0, .L0
     nop
     lw ra, 0x0(sp)                  
     lw s0, 0x4(sp)
@@ -116,7 +105,7 @@ SL811_READ_BUF:
     sb v0, 0(s1)
     addi s0, s0, -1
     addi s1, s1, -1
-    bgez s0 .L1
+    bgez s0, .L1
     nop
     lw ra, 0x0(sp)                  
     lw s0, 0x4(sp)
@@ -158,7 +147,7 @@ RESET_SL811:
     addiu s0, s0, %lo(DEVICE_PRESENT)
     sw zero, 0(s0)
     addi v0, v0, -64
-    bnez .OUT1 
+    bnez v0, .OUT1 
     nop
     addi s1, zero, 1
     sw s1, 0(s0)
@@ -258,7 +247,7 @@ SETUP_PACKET:
     add s1, zero, a1
     add s2, zero, a2
     addi a0, zero, 0x10
-    addi a1, zero, s0
+    add a1, zero, s0
     addi a2, zero, 8
     jal SL811_WRITE_BUF
     nop
@@ -332,7 +321,7 @@ IN_PACKET:
     jal SL811_WRITE
     nop
     addi a0, zero, SL11H_DEVADDRREG
-    addi a1, zero, s3
+    add a1, zero, s3
     jal SL811_WRITE
     nop
     addi a0, zero, SL11H_IRQ_STATUS
@@ -381,7 +370,7 @@ IN_PACKET:
     j .RET3
     nop
 .OUT6:
-    bnez s4 .L4
+    bnez s4, .L4
     nop
     andi t2, t1, SL11H_STATMASK_NAK
     beq t2, zero, .L4
@@ -616,7 +605,7 @@ USB_GET_CONF_DESC:
     sub s6, s1, s7
     addi t0, zero, 120
     sub t1, s7, t0
-    bgtz .OUT10
+    bgtz t1, .OUT10
     nop
     add t0, zero, s7
 .OUT10:
@@ -812,8 +801,8 @@ CHECK_KEYBOARD_INPUT:
     lui t0, %hi(PRESSED_NOW)
     addi t0, %lo(PRESSED_NOW)
     addi t1, zero, 32
-.L6
-    sw, zero, 0(t0)
+.L6:
+    sw zero, 0(t0)
     addi t0, t0, 4
     addi t1, t1, -1
     bnez t1, .L6
@@ -845,11 +834,11 @@ CHECK_KEYBOARD_INPUT:
     lui t1, %hi(KEY_SHIFT_TABLE)
     addi t1, %lo(KEY_SHIFT_TABLE)
 .OUT14:
-    addi t1, t1, t4
+    add t1, t1, t4
     lb t5, 0x0(t4)
     lui t1, %hi(PRESSED_NOW)
     addi t1, %lo(PRESSED_NOW)
-    addi t1, t1, t5
+    add t1, t1, t5
     addi t2, zero, 1
     sb t2, 0x0(t1)
     addi t0, t0, 1
@@ -863,15 +852,15 @@ CHECK_KEYBOARD_INPUT:
 .L8:
     lui t1, %hi(PRESSED_NOW)
     addi t1, %lo(PRESSED_NOW)
-    addi t1, t1, t0
+    add t1, t1, t0
     lb t3, 0x0(t1)
     lui t2, %hi(PRESSED)
     addi t2, %lo(PRESSED)
-    addi t2, t2, t0
+    add t2, t2, t0
     lb t4, 0x0(t2)
     beq t3, zero, .OUT15
     nop
-    bnez t4, zero, .OUT15
+    bnez t4, .OUT15
     nop   
     
     addi s0, zero, 1

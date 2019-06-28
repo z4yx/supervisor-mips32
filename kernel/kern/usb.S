@@ -59,6 +59,9 @@ rbuf:
     .bss
     .p2align 2
     .global KEYBOARD_BUF
+    .global BYTE_READ
+BYTE_READ:
+    .byte 0
 DEVICE_PRESENT:
     .word 0
 LAST_STATUS:
@@ -925,6 +928,14 @@ USB_SL811_INIT:
     addi a1, zero, 1
     addi a2, zero, 1
     jal USB_SET_CONF
+    nop
+
+    lui a0, %hi(G_BUF)
+    addiu a0, a0, %lo(G_BUF)
+    addi a1, zero, 8
+    addi a2, zero, 1
+    addi a3, zero, 1
+    jal USB_INT_IN
     nop
 .RET9:
     lw ra, 0x0(sp)

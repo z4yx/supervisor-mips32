@@ -52,6 +52,8 @@
 #define SYS_getdirentry     128
 #define SYS_dup             130
 
+#define SYS_getc            29
+
 /* fetch program from serial bus */
 #define SYS_fetchrun		241	 // a prime number :)
 

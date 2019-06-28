@@ -162,6 +162,9 @@ SYSCALL:
     ori t0, zero, SYS_putc          // 取得putc调用号
     beq v0, t0, .syscall_putc       // syscall putc
     nop
+    ori t0, zero, SYS_getc  
+    beq v0, t0, .syscall_getc
+    nop
 
     // 系统调用扩展
 
@@ -177,6 +180,15 @@ SYSCALL:
     nop
     j RETURNFRMTRAP
     nop
+
+.syscall_getc:
+    jal READBYTE
+    nop
+    sb v0, TF_v0(sp)
+    
+    j RETURNFRMTRAP
+    nop
+
 #endif
 
 

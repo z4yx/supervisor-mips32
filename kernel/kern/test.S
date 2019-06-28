@@ -40,6 +40,19 @@ UTEST_PUTC:
     nop
     jr ra
     nop
+
+UTEST_GETPUT:
+    ori v0, zero, SYS_getc
+    syscall SYSCALL_BASE
+    nop
+    
+    add a0, zero, v0
+    ori v0, zero, SYS_putc
+    syscall SYSCALL_BASE
+    nop
+
+    jr ra
+    nop
 #endif
 
 

@@ -278,7 +278,10 @@ bss_init_done:
     nop
 #endif
 
-    jal USB_SL811_INIT              
+
+
+    
+    jal USB_SL811_INIT              // 初始化USB
     nop
 
     j WELCOME                       // 进入主线程
@@ -297,7 +300,18 @@ WELCOME:
     lb a0, 0(s0)
     bne a0, zero, .Loop0            // 打印循环至0结束符
     nop
-    j SHELL                         // 开始交互
+
+/*.TESTLOOP:
+    jal READBYTE
+    nop
+    add a0, zero, v0
+    jal WRITESERIAL
+    nop
+    j .TESTLOOP
+    nop*/
+
+
+    j SHELL                        // 开始交互
     nop
 
 

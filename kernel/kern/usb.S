@@ -7,13 +7,57 @@
     .set noreorder
     .set noat
     .rdata
+    .p2align 2
 KEY_TABLE:
     .byte 0,0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','\r',0,'\b','\t',' ','-','=','[',']','\\',0,';','\'','`',',','.','/',0,'F','F','F','F','F','F','F','F','F','F','F','F', 0,0,0,0,0,0,0,0,0,0,0,0,0,0,'/','*','-','+','\r','1','2','3','4','5','6','7','8','9','0','.',0,0,0,'=', 'F','F','F','F','F','F','F','F','F','F','F','F', 0,0,0,0,0,0,0,0,0,0,0,0
 
 KEY_SHIFT_TABLE:
     .byte 0,0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','!','@','#','$','%','^','&','*','(',')','\r',0,'\b','\t',' ','_','+','{','}','|',0,':','"','~','<','>','?',0,'F','F','F','F','F','F','F','F','F','F','F','F',0,0,0,0,0,0,0,0,0,0,0,0,0,0,'/','*','-','+','\r','1','2','3','4','5','6','7','8','9','0','.',0,0,0,'=','F','F','F','F','F','F','F','F','F','F','F','F',0,0,0,0,0,0,0,0,0,0,0,0
 
+mark:
+    .asciz "Reach here!"
+
+device:
+    .asciz "Device detected!"
+
+no_device:
+    .asciz "No device detected!"
+
+setup:
+    .asciz "Setup success!"
+
+in:
+    .asciz "In packet success!"
+
+status:
+    .asciz "Status packet success!"
+
+error:
+    .asciz "Error!"
+
+timeout:
+    .asciz "Timeout!"
+
+dev_desc:
+    .asciz "dev_desc success!"
+
+set_addr:
+    .asciz "set_addr success!"
+
+stall:
+    .asciz "Stall!"
+
+nak:
+    .asciz "Nak!"
+
+loop:
+    .asciz "Loop!"
+
+rbuf:
+    .asciz "rbuf!"
+
     .bss
+    .p2align 2
     .global KEYBOARD_BUF
 DEVICE_PRESENT:
     .word 0
@@ -39,11 +83,18 @@ KEYBOARD_BUF_CUR:
     .word 0
 
     .text
+    .p2align 2
     .global USB_SL811_INIT
     .global READ_KEYBOARD
+    .global DEBUG_STRING
+
+
 SL811_WRITE:            
     lui t0, %hi(SL811_PORT)
     addiu t0, t0, %lo(SL811_PORT)
+    nop
+    nop
+    nop
     sb a0, 0(t0)
     nop
     nop
@@ -90,28 +141,37 @@ SL811_WRITE_BUF:
     nop
 
 SL811_READ_BUF:
-    addi sp, sp, -0x10
+    addi sp, sp, -0x14
     sw ra, 0x0(sp)
     sw s0, 0x4(sp)
     sw s1, 0x8(sp)
     sw s2, 0xC(sp)
-    addi s0, a2, -1
-    add s1, s0, a1
-    add s2, zero, a0
+    sw s3, 0x10(sp)
+    add s0, zero, a0
+    add s1, zero, a1
+    add s2, zero, a2
+
+    addi s3, zero, 0
 .L1:
-    add a0, s2, s0
+    beq s3, s2, .RET13
+    nop
+    add a0, s0, s3
     jal SL811_READ
     nop
-    sb v0, 0(s1)
-    addi s0, s0, -1
-    addi s1, s1, -1
-    bgez s0, .L1
+
+    add t0, s1, s3
+    sb v0, 0(t0)
+
+    addi s3, s3, 1
+    j .L1
     nop
+.RET13:
     lw ra, 0x0(sp)                  
     lw s0, 0x4(sp)
     lw s1, 0x8(sp)
     lw s2, 0xC(sp)
-    addi sp, sp, 0x10
+    lw s3, 0x10(sp)
+    addi sp, sp, 0x14
     jr ra
     nop
 
@@ -146,9 +206,16 @@ RESET_SL811:
     lui s0, %hi(DEVICE_PRESENT)
     addiu s0, s0, %lo(DEVICE_PRESENT)
     sw zero, 0(s0)
-    addi v0, v0, -64
-    bnez v0, .OUT1 
+    andi t0, v0, 0x40
+    bne t0, zero, .OUT1 
     nop
+#ifdef DEBUG
+    lui a0, %hi(device)
+    addiu a0, a0, %lo(device)
+    jal DEBUG_STRING
+    nop
+#endif
+
     addi s1, zero, 1
     sw s1, 0(s0)
 .OUT1:
@@ -205,6 +272,10 @@ WAIT_TRANSFER:
     sw s1, 0x8(sp)
     addi s0, zero, 100
 .L3:
+    addi a0, zero, 8
+    jal SLEEP
+    nop
+
     addi a0, zero, SL11H_IRQ_STATUS
     jal SL811_READ
     nop
@@ -219,7 +290,7 @@ WAIT_TRANSFER:
     jal SL811_READ
     nop
     lui s1, %hi(LAST_STATUS)
-    addiu s1, %lo(LAST_STATUS)
+    addiu s1, s1, %lo(LAST_STATUS)
     sw v0, 0(s1)
     addi v0, zero, 0
     j .RET1
@@ -274,10 +345,13 @@ SETUP_PACKET:
     ori a1, a1, SL11H_HCTLMASK_AFTERSOF
     jal SL811_WRITE
     nop
+
     jal WAIT_TRANSFER
     nop
+
     beq v0, zero, .OUT3
     nop
+
     addi v0, zero, -1
     j .RET2
     nop
@@ -308,6 +382,7 @@ IN_PACKET:
     add s3, zero, a3
     lw s4, 0x18(sp)
 .L4:
+
     addi a0, zero, SL11H_BUFADDRREG
     addi a1, zero, 0x20
     jal SL811_WRITE
@@ -342,7 +417,14 @@ IN_PACKET:
     jal SL811_WRITE
     nop
     beq v0, zero, .OUT4
+
     addi v0, zero, -1
+#ifdef DEBUG
+    lui a0, %hi(error)
+    addiu a0, a0, %lo(error)
+    jal DEBUG_STRING
+    nop
+#endif
     j .RET3
     nop
 .OUT4:
@@ -352,11 +434,23 @@ IN_PACKET:
     andi t2, t1, SL11H_STATMASK_ACK
     beq t2, zero, .OUT5
     nop
+#ifdef DEBUG
+    lui a0, %hi(rbuf)
+    addiu a0, a0, %lo(rbuf)
+    jal DEBUG_STRING
+    nop
+#endif
     addi a0, zero, 0x20
     add a1, zero, s0
-    add a1, zero, s1
+    add a2, zero, s1
     jal SL811_READ_BUF
     nop
+#ifdef DEBUG   
+    lui a0, %hi(rbuf)
+    addiu a0, a0, %lo(rbuf)
+    jal DEBUG_STRING
+    nop
+#endif
     addi v0, zero, 0
     j .RET3
     nop
@@ -367,6 +461,12 @@ IN_PACKET:
     beq t2, zero, .OUT6
     nop
     addi v0, zero, -1
+#ifdef DEBUG
+    lui a0, %hi(timeout)
+    addiu a0, a0, %lo(timeout)
+    jal DEBUG_STRING
+    nop
+#endif
     j .RET3
     nop
 .OUT6:
@@ -376,6 +476,12 @@ IN_PACKET:
     beq t2, zero, .L4
     nop
     addi v0, zero, -1
+#ifdef DEBUG
+    lui a0, %hi(nak)
+    addiu a0, a0, %lo(nak)
+    jal DEBUG_STRING
+    nop
+#endif
 .RET3:  
     lw ra, 0x0(sp)
     lw s0, 0x4(sp)
@@ -483,8 +589,10 @@ USB_GET_DEV_DESC:
     add s5, zero, v0
     bnez s3, .OUT8
     nop
+
     bnez s4, .OUT8
     nop
+
     bnez s5, .OUT8
     nop
     addi v0, zero, 0
@@ -514,6 +622,10 @@ USB_SET_ADDRESS:
     sw s3, 0x24(sp)
     sw s4, 0x28(sp)
 
+    add s0, zero, a0
+    add s1, zero, a1
+    add s2, zero, a2
+
     ori t0, zero, USB_REQ_TYPE_OUT
     ori t0, t0, USB_REQ_TYPE_STANDARD
     ori t0, t0, USB_REQ_TYPE_DEVICE
@@ -526,8 +638,15 @@ USB_SET_ADDRESS:
     add a0, zero, sp
     add a1, zero, s0
     add a2, zero, s1
+
     jal SETUP_PACKET
     nop
+#ifdef DEBUG
+    lui a0, %hi(setup)
+    addiu a0, a0, %lo(setup)
+    jal DEBUG_STRING
+    nop
+#endif
     add s3, zero, v0
     addi a0, sp, 8
     addi a1, zero, 0
@@ -538,6 +657,12 @@ USB_SET_ADDRESS:
     sw t0, 0x0(sp)
     jal IN_PACKET
     nop
+#ifdef DEBUG
+    lui a0, %hi(in)
+    addiu a0, a0, %lo(in)
+    jal DEBUG_STRING
+    nop
+#endif
     addi sp, sp, 4
     add s4, zero, v0
     bnez s3, .OUT9
@@ -718,7 +843,7 @@ USB_INT_IN:
     sw s0, 0x4(sp)
     sw s1, 0x8(sp)
     sw s2, 0xc(sp)
-
+    
     add s0, zero, a2
     add s1, zero, a3
     addi sp, sp, -4
@@ -746,25 +871,43 @@ USB_SL811_INIT:
     sw ra, 0x0(sp)
 
     lui t0, %hi(KEYBOARD_BUF)
-    addiu t0, %lo(KEYBOARD_BUF)
+    addiu t0, t0, %lo(KEYBOARD_BUF)
     lui t1, %hi(KEYBOARD_BUF_CUR)
-    addiu t1, %lo(KEYBOARD_BUF_CUR)
+    addiu t1, t1, %lo(KEYBOARD_BUF_CUR)
     sw t0, 0x0(t1)
 
     jal RESET_SL811
     nop
+    
     lui t0, %hi(DEVICE_PRESENT)
-    addiu t0, %lo(DEVICE_PRESENT)
+    addiu t0, t0, %lo(DEVICE_PRESENT)
     lw t1, 0x0(t0)
     beq t1, zero, .RET9
     nop
+#ifdef DEBUG
+    lui a0, %hi(mark)
+    addiu a0, a0, %lo(mark)
+    jal DEBUG_STRING
+    nop
+#endif
+
+    addi sp, sp, -20
     add a0, zero, sp
     addi a1, zero, 0
     addi a2, zero, 0
     jal USB_GET_DEV_DESC
     nop
+
+    addi sp, sp, 20
     bnez v0, .RET9
     nop
+#ifdef DEBUG
+    lui a0, %hi(dev_desc)
+    addiu a0, a0, %lo(dev_desc)
+    jal DEBUG_STRING
+    nop
+#endif
+
     addi a0, zero, 0
     addi a1, zero, 0
     addi a2, zero, 1
@@ -772,6 +915,12 @@ USB_SL811_INIT:
     nop
     bnez v0, .RET9
     nop
+#ifdef DEBUG
+    lui a0, %hi(set_addr)
+    addiu a0, a0, %lo(set_addr)
+    jal DEBUG_STRING
+    nop
+#endif
     addi a0, zero, 0
     addi a1, zero, 1
     addi a2, zero, 1
@@ -790,7 +939,7 @@ CHECK_KEYBOARD_INPUT:
     addi s0, zero, 0
 
     lui a0, %hi(G_BUF)
-    addi a0, %lo(G_BUF)
+    addiu a0, a0, %lo(G_BUF)
     addi a1, zero, 8
     addi a2, zero, 1
     addi a3, zero, 1
@@ -799,7 +948,7 @@ CHECK_KEYBOARD_INPUT:
     bnez v0, .RET10
     nop
     lui t0, %hi(PRESSED_NOW)
-    addi t0, %lo(PRESSED_NOW)
+    addiu t0, t0, %lo(PRESSED_NOW)
     addi t1, zero, 32
 .L6:
     sw zero, 0(t0)
@@ -811,14 +960,17 @@ CHECK_KEYBOARD_INPUT:
     addi t0, zero, 2
 .L7:
     lui t1, %hi(G_BUF)
-    addi t1, %lo(G_BUF)
+    addiu t1, t1, %lo(G_BUF)
     add t1, t1, t0
     lb t4, 0x0(t1)
-    addi t2, t4, -128
-    bgez t2, .RET10
+    bltz t4, .OUT16
     nop
+    addi t2, t4, -128
+    bgez t2, .OUT16
+    nop
+    
     lui t1, %hi(G_BUF)
-    addi t1, %lo(G_BUF)
+    addiu t1, t1, %lo(G_BUF)
     lb t2, 0x0(t1)
     ori t3, zero, KEY_MOD_LSHIFT
     ori t3, t3, KEY_MOD_RSHIFT
@@ -827,35 +979,36 @@ CHECK_KEYBOARD_INPUT:
     nop
 .NO_SHIFT:
     lui t1, %hi(KEY_TABLE)
-    addi t1, %lo(KEY_TABLE)
+    addiu t1, t1, %lo(KEY_TABLE)
     j .OUT14
     nop
 .SHIFT:
     lui t1, %hi(KEY_SHIFT_TABLE)
-    addi t1, %lo(KEY_SHIFT_TABLE)
+    addiu t1, t1, %lo(KEY_SHIFT_TABLE)
 .OUT14:
     add t1, t1, t4
-    lb t5, 0x0(t4)
+    lb t5, 0x0(t1)
     lui t1, %hi(PRESSED_NOW)
-    addi t1, %lo(PRESSED_NOW)
+    addiu t1, t1, %lo(PRESSED_NOW)
     add t1, t1, t5
     addi t2, zero, 1
     sb t2, 0x0(t1)
+.OUT16:
     addi t0, t0, 1
-    addi t4, t0, -8
-    bnez t4, .L7
+    addi t4, zero, 8
+    bne t0, t4, .L7
     nop
 
     addi t0, zero, 127
     lui t6, %hi(KEYBOARD_BUF)
-    addiu t6, %lo(KEYBOARD_BUF)
+    addiu t6, t6, %lo(KEYBOARD_BUF)
 .L8:
     lui t1, %hi(PRESSED_NOW)
-    addi t1, %lo(PRESSED_NOW)
+    addiu t1, t1, %lo(PRESSED_NOW)
     add t1, t1, t0
-    lb t3, 0x0(t1)
+    lb t3, 0x0(t1)          
     lui t2, %hi(PRESSED)
-    addi t2, %lo(PRESSED)
+    addiu t2, t2, %lo(PRESSED)
     add t2, t2, t0
     lb t4, 0x0(t2)
     beq t3, zero, .OUT15
@@ -873,7 +1026,7 @@ CHECK_KEYBOARD_INPUT:
     nop
 
     lui t5, %hi(KEYBOARD_BUF_CUR)
-    addiu t5, %lo(KEYBOARD_BUF_CUR)
+    addiu t5, t5, %lo(KEYBOARD_BUF_CUR)
     sw t6, 0x0(t5)
 .RET10:
     add v0, zero, s0
@@ -886,10 +1039,10 @@ CHECK_KEYBOARD_INPUT:
 KEYBOARD_BUF_EMPTY:
     addi v0, zero, 1
     lui t0, %hi(KEYBOARD_BUF_CUR)
-    addiu t0, %lo(KEYBOARD_BUF_CUR)
+    addiu t0, t0, %lo(KEYBOARD_BUF_CUR)
     lw t1, 0x0(t0)
     lui t0, %hi(KEYBOARD_BUF)
-    addiu t0, %lo(KEYBOARD_BUF)
+    addiu t0, t0, %lo(KEYBOARD_BUF)
     beq t0, t1, .RET11
     nop
     addi v0, zero, 0
@@ -913,11 +1066,13 @@ READ_KEYBOARD:
     nop
 .READBUF:
     lui t0, %hi(KEYBOARD_BUF_CUR)
-    addiu t0, %lo(KEYBOARD_BUF_CUR)
+    addiu t0, t0, %lo(KEYBOARD_BUF_CUR)
     lw t1, 0x0(t0)
     addi t1, t1, -1
+    sw t1, 0x0(t0)
     lb s0, 0x0(t1) 
 .RET12:
+    add v0, zero, s0
     lw ra, 0x0(sp)
     lw s0, 0x4(sp)
     addi sp, sp, 8
@@ -936,6 +1091,33 @@ SLEEP:
     nop
     jr ra 
     nop
+
+DEBUG_STRING:
+    addi sp, sp, -16
+    sw ra, 0x0(sp)
+    sw s0, 0x4(sp)
+    sw t0, 0x8(sp)
+    sw t1, 0xc(sp)
+
+    add s0, zero, a0
+    lb a0, 0(s0)
+.L9:
+    addiu s0, s0, 0x1
+    jal WRITESERIAL                 // 调用串口写函数
+    nop
+    lb a0, 0(s0)
+    bne a0, zero, .L9            // 打印循环至0结束符
+    nop
+
+    lw ra, 0x0(sp)
+    lw s0, 0x4(sp)
+    lw t0, 0x8(sp)
+    lw t1, 0xc(sp)
+    addi sp, sp, 16
+
+    jr ra
+    nop
+
 
     .set at
     .set reorder

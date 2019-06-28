@@ -120,7 +120,7 @@
 //void usb_sl811_init(void);
 
 #define SL811_PORT 0xbc020000
-#define CYCLES_PER_MS 0xc350	/* clocks per millisecond */
+#define CYCLES_PER_MS 0x5dc0	/* clocks per millisecond */
 
 
 #endif

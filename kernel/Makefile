@@ -1,10 +1,10 @@
 RM	:= rm -f
 ifeq ($(OS),Windows_NT)
 # Windows Host
-GCCPREFIX	:= mips-mti-elf-
+GCCPREFIX	?= mips-mti-elf-
 else
 #GCCPREFIX	:= mipsel-linux-gnu-
-GCCPREFIX	:= mips-mti-elf-
+GCCPREFIX	?= mips-mti-elf-
 endif
 QEMU := qemu-system-mipsel
 LD	:= $(GCCPREFIX)ld

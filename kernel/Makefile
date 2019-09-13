@@ -70,7 +70,7 @@ show-utest: $(TARGET)
 .PHONY: commits-num show-utest sim clean
 
 sim: $(TARGET)
-	$(QEMU) -M mipssim -m 8M -kernel $< -vnc :0 -serial tcp::6666,server -s
+	$(QEMU) -M mipssim -m 8M -kernel $< -nographic -monitor none -serial tcp::6666,server -s
 
 commits-num:
 	@git log --pretty=format:"commit %H" | grep -c 'commit'

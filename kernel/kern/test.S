@@ -41,7 +41,7 @@ UTEST_PUTC:
     jr ra
     nop
 
-UTEST_GETPUT:
+UTEST_KBD: // 从键盘读入一个字符，在串口上显示
     ori v0, zero, SYS_getc
     syscall SYSCALL_BASE
     nop

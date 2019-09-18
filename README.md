@@ -12,7 +12,9 @@ Thinpad 教学计算机搭配了监控程序，能够接受用户命令，支持
 
 Kernel 使用汇编语言编写，使用到的指令有20余条，均符合 MIPS32 Release2 规范。Kernel 提供了三种不同的版本，以适应不同的档次的 CPU 实现。它们分别是：第一档为基础版本，直接基本的I/O和命令执行功能，不依赖异常、中断、CP0等处理器特征，适合于最简单的 CPU 实现；第二档支持中断，使用中断方式完成串口的I/O功能，需要处理器实现中断处理机制，及相关的CP0处理器；第三档在第二档基础上进一步增加了TLB的应用，要求处理器支持基于TLB的内存映射，更加接近于操作系统对处理器的需求。
 
-为了在硬件上运行 Kernel 程序，我们首先要对 Kernel 的汇编代码进行编译。建议使用 [MTI Bare Metal](https://cloud.tsinghua.edu.cn/f/16dde018b00749a4a4de/) 编译器。将下载的压缩包解压到任意目录后，把 `bin` 文件夹添加到系统的 `PATH` 环境变量中，以便 make 工具找到编译器。
+为了在硬件上运行 Kernel 程序，我们首先要对 Kernel 的汇编代码进行编译。Linux 建议使用 [MTI Bare Metal](https://cloud.tsinghua.edu.cn/f/16dde018b00749a4a4de/) 编译器，macOS 建议用 [mipsel-linux-musl-cross](http://mac.musl.cc/mipsel-linux-musl-cross.tgz)。将下载的压缩包解压到任意目录后，设置环境变量 `GCCPREFIX` 以便 make 工具找到编译器，例如：
+
+`export GCCPREFIX=/usr/local/mipsel-linux-musl-cross/bin/mipsel-linux-musl-`
 
 下面是编译监控程序的过程。在`kernel`文件夹下面，有汇编代码和 Makefile 文件，我们可以使用 make 工具编译 Kernel 程序。假设当前目录为 `kernel` ，目标版本为基础版本，我们在终端中运行命令
 
@@ -208,33 +210,76 @@ Term 程序位于`term`文件夹中，可执行文件为`term.py`。对于本地
 以下是一次输入用户程序并运行的过程演示：
 
 	MONITOR for MIPS32 - initialized.
-	>> A
+	>> a
 	>>addr: 0x80100000
 	one instruction per line, empty line to end.
-	[0x80100000] addiu $2,$0,1
-	[0x80100004] addu $3,$2,$2
-	[0x80100008] jr $31
-	[0x8010000c] nop
-	[0x80100010] 
-	>> U
+	[0x80100000] ori $v0,$0,5
+	[0x80100004] xor $t0,$t0,$t0
+	[0x80100008] xor $t1,$t1,$t1
+	[0x8010000c] loop:
+	[0x8010000c] addu $t1,$t1,$t0
+	[0x80100010] addiu $t0,$t0,1
+	[0x80100014] bne $v0,$t0,loop
+	[0x80100018] nop
+	[0x8010001c] jr $ra
+	[0x80100020] nop
+	[0x80100024] 
+	>> u
 	>>addr: 0x80100000
-	>>num: 16
-	0x80100000:  li	v0,1
-	0x80100004:  addu	v1,v0,v0
-	0x80100008:  jr	ra
-	0x8010000c:  nop
-	>> G
+	>>num: 64
+	0x80100000: li	v0,0x5
+	0x80100004: xor	t0,t0,t0
+	0x80100008: xor	t1,t1,t1
+	0x8010000c: addu	t1,t1,t0
+	0x80100010: addiu	t0,t0,1
+	0x80100014: bne	v0,t0,0x8010000c
+	0x80100018: nop
+	0x8010001c: jr	ra
+	0x80100020: nop
+	0x80100024: nop
+	0x80100028: nop
+	0x8010002c: nop
+	0x80100030: nop
+	0x80100034: nop
+	0x80100038: nop
+	0x8010003c: nop
+	>> g
 	>>addr: 0x80100000
-	
+
 	elapsed time: 0.000s
-	>> R
+	>> r
 	R1 (AT)    = 0x00000000
-	R2 (v0)    = 0x00000001
-	R3 (v1)    = 0x00000002
+	R2 (v0)    = 0x00000005
+	R3 (v1)    = 0x00000000
 	R4 (a0)    = 0x00000000
 	R5 (a1)    = 0x00000000
 	R6 (a2)    = 0x00000000
-	...
+	R7 (a3)    = 0x00000000
+	R8 (t0)    = 0x00000005
+	R9 (t1)    = 0x0000000a
+	R10(t2)    = 0x00000000
+	R11(t3)    = 0x00000000
+	R12(t4)    = 0x00000000
+	R13(t5)    = 0x00000000
+	R14(t6)    = 0x00000000
+	R15(t7)    = 0x00000000
+	R16(s0)    = 0x00000000
+	R17(s1)    = 0x00000000
+	R18(s2)    = 0x00000000
+	R19(s3)    = 0x00000000
+	R20(s4)    = 0x00000000
+	R21(s5)    = 0x00000000
+	R22(s6)    = 0x00000000
+	R23(s7)    = 0x00000000
+	R24(t8)    = 0x00000000
+	R25(t9/jp) = 0x00000000
+	R26(k0)    = 0x00000000
+	R27(k1)    = 0x00000000
+	R28(gp)    = 0x00000000
+	R29(sp)    = 0x807f0000
+	R30(fp/s8) = 0x807f0000
+	>> q
+
 
 当处理器和 Kernel 支持异常功能时（即上文所述 EN_INT=y ），用户还可以用 Syscall 的方式打印字符。打印字符的系统调用号为 30。使用时，用户把调用号保存在v0寄存器，打印字符参数保存在a0寄存器，并执行 syscall 指令，a0寄存器的低八位将作为字符打印。例如：
 	

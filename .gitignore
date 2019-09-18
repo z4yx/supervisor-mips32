@@ -1,4 +1,6 @@
 *.mp4
-*/kernel.elf
+kernel/kernel.elf
+kernel/kernel.bin
+kernel/.config_*
 */obj/*
 *.test

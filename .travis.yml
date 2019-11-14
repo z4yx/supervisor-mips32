@@ -8,8 +8,7 @@ before_install:
   - tar -xf Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz
 script:
   - export PATH=$PATH:$PWD/mips-mti-elf/2016.05-06/bin
-  - make GCCPREFIX=mips-mti-elf- ON_FPGA=y -C kernel/
-  - make GCCPREFIX=mips-mti-elf- ON_FPGA=y show-utest
+  - make GCCPREFIX=mips-mti-elf- ON_FPGA=y -C kernel/ all show-utest
   - cp kernel/kernel.bin kernel/kernel-fpga.bin
   - cp kernel/kernel.elf kernel/kernel-fpga.elf
   - make GCCPREFIX=mips-mti-elf- ON_FPGA=n EN_INT=y EN_TLB=y -C kernel/

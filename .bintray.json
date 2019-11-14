@@ -1,0 +1,19 @@
+{
+    "package": {
+        "name": "kernel",
+        "repo": "supervisor-mips32",
+        "subject": "z4yx",
+        "issue_tracker_url": "https://github.com/z4yx/supervisor-mips32/issues",
+        "vcs_url": "https://github.com/z4yx/supervisor-mips32.git",
+        "licenses": ["Apache-1.0"],
+        "labels": ["mips"],
+        "public_download_numbers": false,
+        "public_stats": false
+    },
+
+    "files":
+        [
+            {"includePattern": "kernel/(kernel-.+\\..+)", "uploadPattern": "$1"}
+        ],
+    "publish": true
+}

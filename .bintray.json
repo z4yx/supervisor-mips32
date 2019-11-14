@@ -10,7 +10,9 @@
         "public_download_numbers": false,
         "public_stats": false
     },
-
+    "version": {
+        "name": "git-dev"
+    },
     "files":
         [
             {"includePattern": "kernel/(kernel-.+\\..+)", "uploadPattern": "$1"}

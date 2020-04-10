@@ -1,10 +1,8 @@
-#FROM alpine:3
 FROM debian:buster
 
-#RUN apk add --no-cache libc6-compat bash python3 make qemu-system-mipsel curl awk && \
+# install qemu-system-mips expect python3-serial for testing  
 RUN apt-get update && \
-    apt-get install -y curl python3-pip make qemu-system-mips expect && \  
-    pip3 install pyserial && \
+    apt-get install -y curl make && \
     curl -sc /tmp/gcokie 'https://drive.google.com/uc?export=download&id=1Mo5hGcCg1zm8Ca0KQB-G5PNI3fXfAAmR' && \
     getcode="$(awk '/_warning_/ {print $NF}' /tmp/gcokie)" && \
     curl -s -C - -LOJb /tmp/gcokie "https://drive.google.com/uc?export=download&confirm=${getcode}&id=1Mo5hGcCg1zm8Ca0KQB-G5PNI3fXfAAmR" && \

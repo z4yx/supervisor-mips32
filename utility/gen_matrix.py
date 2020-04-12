@@ -18,7 +18,7 @@ print(c)
 def printHex(f, i):
     if i < 0:
         i += 0x100000000
-    f.write(f"0x{i:08x}\n")
+    f.write(f"{i:08x}\n")
 
 with open("matrix.in", "w") as f:
     addr += 16

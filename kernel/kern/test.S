@@ -21,8 +21,97 @@
     .section .text.utest
     .p2align 2
 
+    /*  Simple test program
+     *  Write integer 1 to register v0
+     */
 UTEST_SIMPLE:
     addiu v0, v0, 0x1
+    jr ra
+    nop
+
+    /*  STREAM test program
+     *  Continous memory read/write
+     */
+UTEST_STREAM:
+    jr ra
+    nop
+
+    /*  MATRIX test program
+     *  Matrix multiplication
+     *  Reference C code:
+        void matrix(int a[128][128],int b[128][128],int c[128][128],unsigned int n) {
+            unsigned int i,j,k;
+            for (k=0; k!=n; k++) {
+                for (i=0; i!=n; i++) {
+                    int r = a[i][k];
+                    for (j=0; j!=n; j++)
+                        c[i][j] += r * b[k][j];
+                }
+            }
+        }
+     */
+UTEST_MATRIX:
+    // Load arguments
+    li      s0, 0x80400000
+    lw      a0, 0(s0)
+    lw      a1, 4(s0)
+    lw      a2, 8(s0)
+    lw      a3, 12(s0)
+    // a0 -> a
+    // a1 -> b
+    // a2 -> c
+    // a3 -> n
+    // v1 -> k
+    // t1 -> i
+    // t3 -> j
+    // t7 -> r
+    or      v1,$0,$0
+loop1:
+    beq     v1,a3,loop1end
+    sll     t0,v1,2
+
+    sll     t2,v1,9
+    addu    t0,a0,t0
+    addu    t2,a1,t2
+    or      t1,$0,$0
+loop2:
+    beq     t1,a3,loop2end
+    sll     v0,t1,9
+
+    lw      t7,0(t0)
+    addu    v0,a2,v0
+    or      t4,t2,$0
+    or      t3,$0,$0
+loop3:
+    beq     t3,a3,loop3end
+    addiu   t3,t3,1
+
+    lw      t5,0(t4)
+    lw      t6,0(v0)
+    mul     t5,t7,t5
+    addiu   v0,v0,4
+    addiu   t4,t4,4
+    addu    t5,t6,t5
+    beq     $0,$0,loop3
+    sw      t5,-4(v0)
+
+loop3end:
+    addiu   t1,t1,1
+    beq     $0,$0,loop2
+    addiu   t0,t0,512
+
+loop2end:
+    beq     $0,$0,loop1
+    addiu   v1,v1,1
+
+loop1end:
+    jr ra
+    nop
+
+    /*  CryptoNight test program
+     *  Run CryptoNight hash algorithm
+     */
+UTEST_CRYPTONIGHT:
     jr ra
     nop
 

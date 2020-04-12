@@ -8,12 +8,7 @@
  *                        TEST for MONITOR
  *  Built-in test program
  *  Entry symbol prefix 'UTEST_'
- *  为了测试时间，性能测试程序执行完毕会向串口写入令符。
  *==============================================================*/
-
-#define TESTLOOP64  0x04000000      /*  64M约6.7千万次   */
-#define TESTLOOP32  0x02000000      /*  32M约3.4千万次   */
-#define TESTLOOP16  0x01000000      /*  16M约1.7千万次   */
     
 
     .set noreorder
@@ -33,7 +28,21 @@ UTEST_SIMPLE:
      *  Continous memory read/write
      */
 UTEST_STREAM:
-    jr ra
+    li      a0, 0x80100000
+    li      a1, 0x80400000
+    li      a2, 0x00300000
+    addu    a2,a0,a2
+stream_next:
+    beq     a0,a2,stream_end
+    addiu   a1,a1,4
+
+    lw      v0,0(a0)
+    sw      v0,-4(a1)
+    beq     $0,$0,stream_next
+    addiu   a0,a0,4
+
+stream_end:
+    jr      ra
     nop
 
     /*  MATRIX test program
@@ -131,6 +140,10 @@ UTEST_PUTC:
     nop
 #endif
 
+
+#define TESTLOOP64  0x04000000      /*  64M约6.7千万次   */
+#define TESTLOOP32  0x02000000      /*  32M约3.4千万次   */
+#define TESTLOOP16  0x01000000      /*  16M约1.7千万次   */
 
     /*  性能标定程序(1)
      *  这段程序一般没有数据冲突和结构冲突，可作为性能标定。

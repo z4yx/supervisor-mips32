@@ -118,10 +118,69 @@ loop1end:
     nop
 
     /*  CryptoNight test program
-     *  Run CryptoNight hash algorithm
+     *  Run simplified CryptoNight memory-hard loop
+     *  Reference C code:
+        void crn(int pad[],unsigned int a,unsigned int b,unsigned int n) {
+            unsigned int k;
+            for (k=0; k!=0x80000; k++)
+                pad[k] = k;
+            for (k=0; k!=n; k++) {
+                unsigned int t, addr1, addr2;
+                addr1 = a & 0x7FFFF;
+                t = (a >> 1) ^ (pad[addr1] << 1); // Replace the AES step
+                pad[addr1] = t ^ b;
+                addr2 = t & 0x7FFFF;
+                b = t;
+                t = pad[addr2];
+                a += b * t;
+                pad[addr2] = a;
+                a ^= t;
+            } 
+        }
      */
 UTEST_CRYPTONIGHT:
-    jr ra
+    // a0 -> pad
+    // a1 -> a
+    // a2 -> b
+    // a3 -> n
+    li      a0, 0x80400000
+    li      a1, 0xdeadbeef
+    li      a2, 0xfaceb00c
+    li      a3, 0x100000
+    or      v1,$0,a0
+    or      v0,$0,$0
+    li      t0,0x80000
+fill_next:
+    sw      v0,0(v1)
+    addiu   v0,v0,1
+    bne     v0,t0,fill_next
+    addiu   v1,v1,4
+
+    or      t1,$0,$0
+    li      t2,0x7ffff
+crn_hext:
+    and     t0,a1,t2
+    sll     t0,t0,2
+    addu    t0,a0,t0
+    lw      v0,0(t0)
+    srl     v1,a1,1
+    sll     v0,v0,1
+    xor     v0,v0,v1
+    and     v1,v0,t2
+    xor     a2,v0,a2
+    sll     v1,v1,2
+    sw      a2,0(t0)
+    addu    v1,a0,v1
+    lw      t0,0(v1)
+    or      a2,$0,v0
+    mul     v0,v0,t0
+    addiu   t1,t1,1
+    addu    a1,v0,a1
+    sw      a1,0(v1)
+    bne     a3,t1,crn_hext
+    xor     a1,t0,a1
+crn_end:
+    jr      ra
     nop
 
     /*  系统调用测试程序

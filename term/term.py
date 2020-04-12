@@ -145,7 +145,11 @@ def run_A(addr):
     prompt_addr = addr
     asm = ".set noreorder\n.set noat\n.org {:#x}\n".format(offset)
     while True:
-        line = raw_input('[0x%04x] ' % prompt_addr).strip()
+        try:
+            line = raw_input('[0x%04x] ' % prompt_addr).strip()
+        except EOFError:
+            print('')
+            break
         if line == '':
             break
         elif re.match("\\w+:$", line) is not None:
@@ -276,6 +280,7 @@ def MainLoop():
         try:
             cmd = raw_input('>> ').strip().upper()
         except EOFError:
+            print('')
             break
         EmptyBuf()
         try:

@@ -41,9 +41,9 @@ endif
 
 CONFIG_FILE := .config_$(ON_FPGA)_$(EN_INT)_$(EN_TLB)
 
-.PHONY: all clean show-utest
+.PHONY: all clean checkdirs show-utest commits-num sim
 
-all: $(TARGET) kernel.bin
+all: $(TARGET) kernel.bin show-utest
 
 $(CONFIG_FILE):
 	@rm -f .config_*
@@ -62,12 +62,10 @@ $(OBJDIR):
 	test -d $@ || mkdir $@
 
 kernel.bin: $(TARGET)
-	@$(GCCPREFIX)objcopy -j .text -j .text.* -O binary -v $< kernel.bin
+	@$(GCCPREFIX)objcopy -j .text -O binary -v $< kernel.bin
 
 show-utest: $(TARGET)
 	@$(GCCPREFIX)objdump -D $< | grep "^[0-9a-f]\{8\} <UTEST_" | grep -n --color=auto 'UTEST_'
-
-.PHONY: commits-num show-utest sim clean
 
 sim: $(TARGET)
 	$(QEMU) -M mipssim -m 8M -kernel $< -nographic -monitor none -serial tcp::6666,server -s

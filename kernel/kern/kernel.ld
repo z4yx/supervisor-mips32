@@ -49,7 +49,7 @@ SECTIONS
         *(.text.ebase180)
         . = ALIGN(0x1000);
         *(.text)
-        . = ALIGN(0x4000); /* "fixed" utest address */
+        . = ALIGN(0x1000); /* "fixed" utest address */
         *(.text.utest)
     }
 }

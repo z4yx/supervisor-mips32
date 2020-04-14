@@ -23,6 +23,7 @@ UTEST_SIMPLE:
     addiu v0, v0, 0x1
     jr ra
     nop
+    /* End of test */
 
     /*  STREAM test program
      *  Continous memory read/write
@@ -44,6 +45,7 @@ stream_next:
 stream_end:
     jr      ra
     nop
+    /* End of test */
 
     /*  MATRIX test program
      *  Matrix multiplication
@@ -60,12 +62,11 @@ stream_end:
         }
      */
 UTEST_MATRIX:
-    // Load arguments
-    li      s0, 0x80400000
-    lw      a0, 0(s0)
-    lw      a1, 4(s0)
-    lw      a2, 8(s0)
-    lw      a3, 12(s0)
+    // set arguments
+    li      a0, 0x80400000
+    li      a1, 0x80410000
+    li      a2, 0x80420000
+    li      a3, 96
     // a0 -> a
     // a1 -> b
     // a2 -> c
@@ -116,6 +117,7 @@ loop2end:
 loop1end:
     jr ra
     nop
+    /* End of test */
 
     /*  CryptoNight test program
      *  Run simplified CryptoNight memory-hard loop
@@ -182,6 +184,7 @@ crn_hext:
 crn_end:
     jr      ra
     nop
+    /* End of test */
 
     /*  系统调用测试程序
      *  该测试仅在实现异常处理时有效

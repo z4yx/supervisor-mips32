@@ -9,16 +9,25 @@ before_install:
 script:
   - export PATH=$PATH:$PWD/mips-mti-elf/2016.05-06/bin
   - make GCCPREFIX=mips-mti-elf- ON_FPGA=y -C kernel/ all show-utest
-  - cp kernel/kernel.bin kernel/kernel-fpga.bin
-  - cp kernel/kernel.elf kernel/kernel-fpga.elf
+  - |
+    if [[ -n "$TRAVIS_TAG" ]]; then
+      mkdir "$TRAVIS_TAG/kernel"
+      cp kernel/kernel.bin "$TRAVIS_TAG/kernel/kernel-fpga.bin"
+      cp kernel/kernel.elf "$TRAVIS_TAG/kernel/kernel-fpga.elf"
+    fi 
   - make GCCPREFIX=mips-mti-elf- ON_FPGA=n EN_INT=y EN_TLB=y -C kernel/
-  - cp kernel/kernel.elf kernel/kernel-qemu-int-tlb.elf
+  - |
+    if [[ -n "$TRAVIS_TAG" ]]; then
+      cp kernel/kernel.elf "$TRAVIS_TAG/kernel/kernel-qemu-int-tlb.elf"
+    fi
   - travis_wait 1 make EN_INT=y EN_TLB=y sim -C kernel || true
   - "./.test-script"
 addons:
   apt:
     update: true
 deploy:
+  on:
+    tags: true
   provider: bintray
   user: z4yx
   skip_cleanup: true

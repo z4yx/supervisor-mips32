@@ -11,7 +11,8 @@
         "public_stats": false
     },
     "version": {
-        "name": "git-dev"
+        "name": "v1.6",
+        "vcs_tag": "v1.6"
     },
     "files":
         [

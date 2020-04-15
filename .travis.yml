@@ -25,12 +25,3 @@ script:
 addons:
   apt:
     update: true
-deploy:
-  on:
-    tags: true
-  provider: bintray
-  user: z4yx
-  skip_cleanup: true
-  file: .bintray.json
-  key:
-    secure: GsCsdMBdTW8ZGFsRUX2Dwu11XeVEOh58gZpgelBIv/h6/6R6Zlqn/+qBVKIA6O62MKDU61DxPoQ9dhRseNY13hYLPxY/clNu4wYSGnlBEnumHPa7AnmYjYTQQyIWseVJALnZtnMhTmaStvS1zKLb0pxPdWLF8LbQA7UvZiBwOC2Kx+gVnm22Gx6LjI1dTflQUt5CnWooRbpIA2KFPXLOV+3TSaECUinHC6Gwf9ts9mpBrOpBTKNbJbkgQ3GRCNOsv73BfNq2e+KvMwEhbdPzToJ2CPRYQUyquYUuLuQ+X6dbWQfWsnIlEuktO/UpPaxopPrBQHKOvfOPnHFB9OySieJ35fKx432TDTc8RSma8aBRa+4V9FoxGj4t4By10xBWzDPWTC+mWkMCSQ7RczaOZPT3nauipDaDdi2nIvlBodJ41dS9x70/Da81Z8Nv0ZuLQ8MwXXRxfMU8Htf4KaD7Zowm37IvcoD1kbQJIkOGeSUrirMKoztzMpwDhVFbxQvKEJ7O4du5eZlibe0g2lzWSY9xlhy5n0ztjBpcP3N1SvSgKycCPIqIe/X2FzhF0szmWy9xBygQtA2cMB+dTalEuoxCw6zCK3qD4SpQKX6tY2RtaZZqXADA14+KdqowL9yLAilJ2OmuTxqszk4rEAZxs7KyU5TF8Hi3NfiGhRm+wgw=

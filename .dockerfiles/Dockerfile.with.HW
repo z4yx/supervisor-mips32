@@ -1,10 +1,10 @@
 FROM vivado2019:2019.2
 
 # more packages: qemu-system-mips expect python3-serial iverilog yosys 
-RUN apt-get update && \
-    apt-get install -y curl make verilator python3-lxml python3-chardet && \
-    curl -o Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz 'https://cloud.tsinghua.edu.cn/f/16dde018b00749a4a4de/?dl=1' && \
-    tar -xf Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz && \
+RUN sudo apt-get update && \
+    sudo apt-get install -y curl make verilator python3-lxml python3-chardet && \
+    curl -L -o Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz 'https://cloud.tsinghua.edu.cn/f/16dde018b00749a4a4de/?dl=1' && \
+    sudo tar -C /opt -xf Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz && \
     rm Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz
 
-ENV PATH="${PWD}/mips-mti-elf/2016.05-06/bin:${PATH}"
+ENV PATH="/opt/mips-mti-elf/2016.05-06/bin:${PATH}"

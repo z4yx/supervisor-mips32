@@ -15,7 +15,7 @@
     },
     "files":
         [
-            {"includePattern": "(v[\\d\\.]+/.+)", "uploadPattern": "$1"}
+            {"includePattern": "(v[\\d\\.]+)/kernel/(.+)", "uploadPattern": "$1/$2"}
         ],
     "publish": true
 }

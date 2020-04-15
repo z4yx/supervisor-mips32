@@ -7,4 +7,5 @@ RUN sudo apt-get update && \
     sudo tar -C /opt -xf Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz && \
     rm Codescape.GNU.Tools.Package.2016.05-06.for.MIPS.MTI.Bare.Metal.CentOS-5.x86_64.tar.gz
 
-ENV PATH="/opt/mips-mti-elf/2016.05-06/bin:${PATH}"
+#ENV PATH="/opt/mips-mti-elf/2016.05-06/bin:${PATH}"
+RUN echo 'export PATH=/opt/mips-mti-elf/2016.05-06/bin:${PATH}' >>~/.bashrc

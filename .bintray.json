@@ -11,12 +11,11 @@
         "public_stats": false
     },
     "version": {
-        "name": "v1.6",
-        "vcs_tag": "v1.6"
+        "name": "git-dev"
     },
     "files":
         [
-            {"includePattern": "(v[\\d\\.]+/kernel/kernel-.+\\..+)", "uploadPattern": "$1"}
+            {"includePattern": "(v[\\d\\.]+/.+)", "uploadPattern": "$1"}
         ],
     "publish": true
 }

@@ -19,6 +19,7 @@ script:
   - |
     if [[ -n "$TRAVIS_TAG" ]]; then
       cp kernel/kernel.elf "$TRAVIS_TAG/kernel/kernel-qemu-int-tlb.elf"
+      find "$TRAVIS_TAG"
     fi
   - travis_wait 1 make EN_INT=y EN_TLB=y sim -C kernel || true
   - "./.test-script"

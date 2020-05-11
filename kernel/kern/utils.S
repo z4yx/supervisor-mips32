@@ -25,7 +25,7 @@ WRITESERIAL:                        // 写串口：将a0的低八位写入串口
     sb a0, %lo(SerialData)(t1)      // 写入
     jr ra
     nop
-#else
+#else                               // QEMU模拟器上的写串口操作
     lui t1, %hi(COM1)
     sb a0, %lo(COM1)(t1)
     jr ra
@@ -47,7 +47,7 @@ READSERIAL:                         // 读串口：将读到的数据写入v0低
     lb v0, %lo(SerialData)(t1)      // 读出
     jr ra
     nop
-#else //ifdef MACH_FPGA
+#else //ifdef MACH_FPGA             // QEMU模拟器上的读串口操作
     lui t1, %hi(COM1)
 .TESTR:
     lb t0, %lo(COM_LSR)(t1)

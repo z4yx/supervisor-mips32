@@ -53,7 +53,7 @@ bss_init_done:
     sw t0, %lo(uregs_fp)(t1)
 
     /* init serial */
-#ifdef MACH_QEMU
+#ifdef MACH_QEMU                    // QEMU模拟器特有的串口初始化过程
     /* see ucore/kern/driver/console.c */
     lui t0, 0xBFD0                  // NOTE: all COM_* share high 16 bits
                                     // 0xBFD0 should be %hi(COM1) but can not be used

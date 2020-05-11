@@ -39,57 +39,9 @@ SHELL:
     ori t0, zero, SH_OP_G
     beq v0, t0, .OP_G
     nop
-    ori t0, zero, SH_OP_T
-    beq v0, t0, .OP_T
-    nop
     j .DONE                         // 错误的操作符，默认忽略
     nop
 
-.OP_T:                              // 操作 - 打印TLB项
-    jal READSERIALWORD              // 取num(index)
-    nop
-    addiu sp, sp, -0x18
-    sw s0, 0x0(sp)
-    sw s1, 0x4(sp)
-
-#ifdef ENABLE_TLB
-    mtc0 v0, CP0_INDEX              // 写入index
-    mfc0 s1, CP0_ENTRYHI            // 保存ASID
-    nop
-    tlbr
-    nop
-    mfc0 s0, CP0_ENTRYHI            // 取ENTRYHI打印
-    sw s0, 0xC(sp)
-    mfc0 s0, CP0_ENTRYLO0           // 取ENTRYLO0
-    sw s0, 0x10(sp)
-    mfc0 s0, CP0_ENTRYLO1           // 取ENTRYLO1
-    sw s0, 0x14(sp)
-    mtc0 s1, CP0_ENTRYHI            // 写回ASID
-    nop
-#else
-    addiu s0, zero, -1              // 不支持TLB则返回全1
-    sw s0, 0xC(sp)
-    sw s0, 0x10(sp)
-    sw s0, 0x14(sp)
-#endif
-
-    ori s1, zero, 0xC               // 打印12字节
-    addiu s0, sp, 0xC               // ENTRYHI位置
-.LC3:
-    lb a0, 0x0(s0)                  // 读一字节
-    addiu s1, s1, -1                // 滚动计数器
-    jal WRITESERIAL                 // 打印
-    nop
-    addiu s0, s0, 1                 // 移动打印指针
-    bne s1, zero, .LC3              // 打印循环
-    nop
-
-    lw s0, 0x0(sp)
-    lw s1, 0x4(sp)
-    addiu sp, sp, 0x18
-
-    j .DONE
-    nop
 
 .OP_R:                              // 操作 - 打印用户空间寄存器
     addiu sp, sp, -8                // 保存s0,s1
@@ -175,11 +127,7 @@ SHELL:
     jal WRITESERIAL                 // 告诉终端用户程序开始运行
     nop
 
-#ifdef ENABLE_INT
-    mtc0 v0, CP0_EPC                // 用户程序入口写入EPC
-#else
     or k0, v0, zero
-#endif
 
     lui ra, %hi(uregs)              // 定位用户空间寄存器备份地址
     addiu ra, %lo(uregs)
@@ -220,12 +168,8 @@ SHELL:
     lui ra, %hi(.USERRET2)          // ra写入返回地址
     addiu ra, %lo(.USERRET2)
     nop
-#ifdef ENABLE_INT
-    eret                            // 进入用户程序
-#else
     jr k0
     nop
-#endif
 .USERRET2:
     nop
 

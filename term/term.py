@@ -116,29 +116,6 @@ def single_line_disassmble(binary_instr, addr):
 
     return result.decode('utf-8')
 
-
-def run_T(num):
-    if num < 0: #Print all entries
-        start = 0
-        entries = 16
-    else:
-        start = num
-        entries = 1
-    print("Index | ASID |  VAddr  |  PAddr  | C | D | V | G")
-    for i in range(start, start+entries):
-        outp.write(b'T')
-        outp.write(int_to_byte_string(i))
-        entry_hi = byte_string_to_int(inp.read(4))
-        entry_lo0 = byte_string_to_int(inp.read(4))
-        entry_lo1 = byte_string_to_int(inp.read(4))
-        if (entry_hi & entry_lo1 & entry_lo0) == 0xffffffff:
-            print("Error: TLB support not enabled")
-            break
-        print("  %x      %02x   %05x_000 %05x_000  %x   %x   %x   %x" %
-            (i, entry_hi&0xff, entry_hi>>12, entry_lo0>>6, entry_lo0>>3&7, entry_lo0>>2&1, entry_lo0>>1&1, entry_lo0&1))
-        print("              %05x_000 %05x_000  %x   %x   %x   %x" %
-            (                entry_hi>>12|1, entry_lo1>>6, entry_lo1>>3&7, entry_lo1>>2&1, entry_lo1>>1&1, entry_lo1&1))
-
 def run_A(addr):
     print("one instruction per line, empty line to end.")
     offset = addr & 0xfffffff
@@ -306,9 +283,6 @@ def MainLoop():
             elif cmd == 'G':
                 addr = raw_input('>>addr: 0x')
                 run_G(int(addr, 16))
-            elif cmd == 'T':
-                num = raw_input('>>num: ')
-                run_T(int(num))
             else:
                 print("Invalid command")
         except ValueError as e:

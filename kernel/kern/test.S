@@ -186,21 +186,6 @@ crn_end:
     nop
     /* End of test */
 
-    /*  系统调用测试程序
-     *  该测试仅在实现异常处理时有效
-     */
-#ifdef ENABLE_INT
-UTEST_PUTC:
-    ori v0, zero, SYS_putc          // 系统调用号
-    ori a0, zero, 0x4F              // 'O'
-    syscall SYSCALL_BASE
-    nop
-    ori a0, zero, 0x4B              // 'K'
-    syscall SYSCALL_BASE
-    nop
-    jr ra
-    nop
-#endif
 
 
 #define TESTLOOP64  0x04000000      /*  64M约6.7千万次   */

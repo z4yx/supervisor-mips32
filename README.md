@@ -1,12 +1,12 @@
-# supervisor-32： 32位监控程序
+# supervisor-32： 32位监控程序（“龙芯杯”个人赛）
 
-[![Build Status](https://travis-ci.org/z4yx/supervisor-mips32.svg?branch=master)](https://travis-ci.org/z4yx/supervisor-mips32)
+[查看最新版本](https://github.com/z4yx/supervisor-mips32/tree/simplified)
 
 ## 介绍
 
-Thinpad 教学计算机搭配了监控程序，能够接受用户命令，支持输入汇编指令并运行，查看寄存器及内存状态等功能。监控程序可在学生实现的 32 位 MIPS CPU 上运行，一方面可以帮助学生理解、掌握 MIPS 指令系统及其软件开发，另一方面可以作为验证学生 CPU 功能正确性的标准。
+本监控程序能够接受用户命令，支持输入汇编指令并运行，查看寄存器及内存状态等功能。监控程序可在学生实现的 32 位 MIPS CPU 上运行，一方面可以帮助学生理解、掌握 MIPS 指令系统及其软件开发，另一方面可以作为验证学生 CPU 功能正确性的标准。
 
-监控程序分为两个部分，Kernel 和 Term。其中 Kernel 使用 MIPS32 汇编语言编写，运行在 Thinpad 上学生实现的 CPU 中，用于管理硬件资源；Term 是上位机程序，使用 Python 语言编写，有基于命令行的用户界面，达到与用户交互的目的。Kernel 和 Term 直接通过串口通信，即用户在 Term 界面中输入的命令、代码经过 Term 处理后，通过串口传输给 Kernel 程序；反过来，Kernel 输出的信息也会通过串口传输到 Term，并展示给用户。
+监控程序分为两个部分，Kernel 和 Term。其中 Kernel 使用 MIPS32 汇编语言编写，运行在 FPGA 上学生实现的 CPU 中，用于管理硬件资源；Term 是上位机程序，使用 Python 语言编写，有基于命令行的用户界面，达到与用户交互的目的。Kernel 和 Term 直接通过串口通信，即用户在 Term 界面中输入的命令、代码经过 Term 处理后，通过串口传输给 Kernel 程序；反过来，Kernel 输出的信息也会通过串口传输到 Term，并展示给用户。
 
 ## Kernel 使用说明
 
@@ -105,11 +105,7 @@ Term 程序运行在实验者的电脑上，提供监控程序和人交互的界
 
 利用这些命令，实验者可以输入一段汇编程序，检查数据是否正确写入，并让程序在处理器上运行验证。
 
-Term 程序位于`term`文件夹中，可执行文件为`term.py`。对于本地的 Thinpad，运行程序时用 -s 选项指定串口。例如：
-
-`python term.py -s COM3` 或者 `python term.py -s /dev/ttyACM0`（串口名称根据实际情况修改）
-
-连接远程实验平台或者 QEMU 模拟器时，使用 -t 选项指定 IP 和端口。例如：
+Term 程序位于`term`文件夹中，可执行文件为`term.py`。连接远程实验平台串口或者 QEMU 模拟器时，使用 `-t` 选项指定 IP 和端口。例如：
 
 `python term.py -t 127.0.0.1:6666`
 

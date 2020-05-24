@@ -8,7 +8,7 @@ Thinpad 教学计算机搭配了监控程序，能够接受用户命令，支持
 
 监控程序分为两个部分，Kernel 和 Term。其中 Kernel 使用 MIPS32 汇编语言编写，运行在 Thinpad 上学生实现的 CPU 中，用于管理硬件资源；Term 是上位机程序，使用 Python 语言编写，有基于命令行的用户界面，达到与用户交互的目的。Kernel 和 Term 直接通过串口通信，即用户在 Term 界面中输入的命令、代码经过 Term 处理后，通过串口传输给 Kernel 程序；反过来，Kernel 输出的信息也会通过串口传输到 Term，并展示给用户。
 
-## Kernel
+## Kernel 使用说明
 
 Kernel 使用汇编语言编写，使用到的指令有20余条，均符合 MIPS32 Release2 规范。为了在硬件上运行 Kernel 程序，我们首先要对 Kernel 的汇编代码进行编译。编译时必须使用MTI Bare Metal工具链：[Linux版下载](https://cloud.tsinghua.edu.cn/f/16dde018b00749a4a4de/) 。将下载的压缩包解压到任意目录后，设置环境变量 `GCCPREFIX` 以便 make 工具找到编译器，例如：
 
@@ -34,9 +34,9 @@ Kernel 运行后会先通过串口输出版本号，该功能可作为检验其�
 
 接下来我们分别说明三个档次的监控程序对于硬件的要求，及简要的设计思想。
 
-### 基础版本
+### 指令集
 
-基础版本的 Kernel 共使用了21条不同的指令，它们是：
+基础版本的 Kernel 共使用了22条不同的指令，它们是：
 
 1. `ADDIU` 001001ssssstttttiiiiiiiiiiiiiiii
 1. `ADDU` 000000ssssstttttddddd00000100001
@@ -51,6 +51,7 @@ Kernel 运行后会先通过串口输出版本号，该功能可作为检验其�
 1. `LB` 100000bbbbbtttttoooooooooooooooo
 1. `LUI` 00111100000tttttiiiiiiiiiiiiiiii
 1. `LW` 100011bbbbbtttttoooooooooooooooo
+1. `MUL` 011100ssssstttttddddd00000000010
 1. `OR` 000000ssssstttttddddd00000100101
 1. `ORI` 001101ssssstttttiiiiiiiiiiiiiiii
 1. `SB` 101000bbbbbtttttoooooooooooooooo
@@ -61,6 +62,10 @@ Kernel 运行后会先通过串口输出版本号，该功能可作为检验其�
 1. `XORI` 001110ssssstttttiiiiiiiiiiiiiiii
 
 根据 MIPS32 规范（在参考文献中）正确实现这些指令后，程序才能正常工作。
+
+CPU 须支持延迟槽，不需要实现CP0、HI、LO寄存器，不需要实现异常、中断，不需要实现TLB。
+
+### 内存映射
 
 监控程序使用了 8 MB 的内存空间，其中约 1 MB 由 Kernel 使用，剩下的空间留给用户程序。此外，为了支持串口通信，还设置了一个内存以外的地址区域，用于串口收发。具体内存地址的分配方法如下表所示：
 
@@ -81,12 +86,12 @@ Kernel 运行后会先通过串口输出版本号，该功能可作为检验其�
 | 0xBFD003FC| [0] | 只读，为1时表示串口空闲，可发送数据|
 | 0xBFD003FC| [1] | 只读，为1时表示串口收到数据|
 
-Kernel 的入口地址为 0x80000000，对应汇编代码`kern/init.S`中的 `START:`标签。在完成必要的初始化流程后，Kernel 输出版本信息，随后进入 shell 线程，与用户交互。shell 线程会等待串口输入，执行输入的命令，并通过串口返回结果，如此往复运行。
+Kernel 的入口地址为 0x80000000，对应汇编代码`kern/evec.S`中的 `INITLOCATE:`标签。在完成必要的初始化流程后，Kernel 输出版本信息，随后进入 shell 线程，与用户交互。shell 线程会等待串口输入，执行输入的命令，并通过串口返回结果，如此往复运行。
 
 当收到启动用户程序的命令后，用户线程代替 shell 线程的活动。用户程序的寄存器，保存在从 0x807F0000 到 0x807F0077 的连续120字节中，依次对应 \$1 到 \$30 用户寄存器，每次启动用户程序时从上述地址装载寄存器值，用户程序运行结束后保存到上述地址。
 
 
-## Term
+## Term 使用说明
 
 Term 程序运行在实验者的电脑上，提供监控程序和人交互的界面。Term 支持7种命令，它们分别是
 
@@ -104,17 +109,15 @@ Term 程序位于`term`文件夹中，可执行文件为`term.py`。对于本地
 
 `python term.py -s COM3` 或者 `python term.py -s /dev/ttyACM0`（串口名称根据实际情况修改）
 
-连接远程实验平台的 Thinpad，或者 QEMU 模拟器时，使用 -t 选项指定 IP 和端口。例如：
+连接远程实验平台或者 QEMU 模拟器时，使用 -t 选项指定 IP 和端口。例如：
 
 `python term.py -t 127.0.0.1:6666`
 
 ### 测试程序
 
-监控程序附带了几个测试程序，代码见`kern/test.S`。我们可以通过命令
+监控程序附带了几个测试程序，代码见`kern/test.S`。Kernel在编译时会显示测试程序入口地址。
 
-`make show-utest`
-
-来查看测试程序入口地址。记下这些地址，并在 Term 中使用G命令运行它们。
+记下这些地址，并在 Term 中使用G命令运行它们。
 
 ### 用户程序编写
 

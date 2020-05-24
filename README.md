@@ -10,9 +10,11 @@
 
 ## Kernel 使用说明
 
-Kernel 使用汇编语言编写，使用到的指令有20余条，均符合 MIPS32 Release2 规范。为了在硬件上运行 Kernel 程序，我们首先要对 Kernel 的汇编代码进行编译。编译时必须使用MTI Bare Metal工具链：[Linux版下载](https://cloud.tsinghua.edu.cn/f/16dde018b00749a4a4de/) 。将下载的压缩包解压到任意目录后，设置环境变量 `GCCPREFIX` 以便 make 工具找到编译器，例如：
+Kernel 使用汇编语言编写，使用到的指令有20余条，均符合 MIPS32 Release2 规范。为了在硬件上运行 Kernel 程序，我们首先要对 Kernel 的汇编代码进行编译。
 
-`export GCCPREFIX=/usr/local/mipsel-linux-musl-cross/bin/mipsel-linux-musl-`
+Linux环境在编译时须使用MTI Bare Metal工具链：[Linux版下载](https://cloud.tsinghua.edu.cn/f/16dde018b00749a4a4de/) 。将下载的压缩包解压到任意目录后，设置环境变量 `GCCPREFIX` 以便 make 工具找到编译器，例如压缩包解压到`/opt`：
+
+`export GCCPREFIX=/opt/mips-mti-elf/2016.05-06/bin/mips-mti-elf-`
 
 下面是编译监控程序的过程。在`kernel`文件夹下面，有汇编代码和 Makefile 文件，我们可以使用 make 工具编译 Kernel 程序。假设当前目录为 `kernel` ，目标版本为基础版本，我们在终端中运行命令
 
@@ -105,7 +107,13 @@ Term 程序运行在实验者的电脑上，提供监控程序和人交互的界
 
 利用这些命令，实验者可以输入一段汇编程序，检查数据是否正确写入，并让程序在处理器上运行验证。
 
-Term 程序位于`term`文件夹中，可执行文件为`term.py`。连接远程实验平台串口或者 QEMU 模拟器时，使用 `-t` 选项指定 IP 和端口。例如：
+Term 程序位于`term`文件夹中，可执行文件为`term.py`，运行前需要安装Python程序。
+
+由于Term程序会调用汇编器，如果是Linux环境，在使用时须设置环境变量 `GCCPREFIX`，设置方法与编译 Kernel 时的配置相同，例如：
+
+`export GCCPREFIX=/opt/mips-mti-elf/2016.05-06/bin/mips-mti-elf-`
+
+设置好环境后，即可连接远程实验平台串口或者 QEMU 模拟器。启动时使用 `-t` 选项指定 IP 和端口。例如连接模拟器时：
 
 `python term.py -t 127.0.0.1:6666`
 

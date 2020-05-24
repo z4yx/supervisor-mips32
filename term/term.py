@@ -14,11 +14,7 @@ import subprocess
 import sys
 import tempfile
 from timeit import default_timer as timer
-try:
-    import serial
-except:
-    print("Please install pyserial")
-    exit(1)
+
 try:
     import readline
 except:
@@ -289,6 +285,11 @@ def MainLoop():
             print(e)
 
 def InitializeSerial(pipe_path, baudrate):
+    try:
+        import serial
+    except:
+        print("Please install pyserial")
+        exit(1)
     global outp, inp
     tty = serial.Serial(port=pipe_path, baudrate=baudrate)
     tty.reset_input_buffer()

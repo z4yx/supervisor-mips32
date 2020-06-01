@@ -43,3 +43,9 @@ with open("matrix.out", "w") as f:
     for row in c:
         for col in row:
             printHex(f, col)
+with open("matrix.bin", "wb") as f:
+    a.tofile(f)
+    b.tofile(f)
+    z.tofile(f)
+    c.tofile(f)
+

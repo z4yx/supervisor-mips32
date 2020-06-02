@@ -15,13 +15,14 @@ void crn(int pad[], unsigned int a, unsigned int b, unsigned int n) {
     a += b * t;
     pad[addr2] = a;
     a ^= t;
+    // printf("%#x %#x\n", a, b);
   }
 }
 
 int main(int argc, char const *argv[]) {
   FILE *fp = fopen("crypto.bin", "wb");
   int pad[0x80000]; // 2MB
-  crn(pad, 0xdeadbeef, 0xdeadbeef, 0x100000);
+  crn(pad, 0xdeadbeef, 0xfaceb00c, 0x100000);
   fwrite(pad, 1, sizeof(pad), fp);
   fclose(fp);
   return 0;
